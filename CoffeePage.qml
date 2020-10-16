@@ -6,6 +6,12 @@ import QtQuick.Controls.Imagine 2.3
 import QtQuick.Extras 1.4
 
 Page {
+
+    // Example to change a label
+    //Connections{
+    //    function onSaidName(){ homebuttonWTtext.text="fun"}
+    //}
+
     title: qsTr("coffePage")
     Image {
         id: imageCoffePage
@@ -134,6 +140,7 @@ Page {
 
             onClicked: {
                 payingProcess.open()
+                Coffee.paying()
             }
         }
         Popup {

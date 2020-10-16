@@ -6,6 +6,12 @@ import QtQuick.Controls.Imagine 2.3
 import QtQuick.Extras 1.4
 
 Page {
+
+    // Example to change a label
+    //Connections{
+    //    function onSaidName(){ homebuttonWTtext.text="fun"}
+    //}
+
     id: wTPage
     title: qsTr("wtPage")
     Image {

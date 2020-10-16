@@ -11,8 +11,10 @@ Window {
     height: 600
     visible: true
     title: qsTr("Selbstverwirklichung")
-
+    Connections{target:Coffee
+    }
     SwipeView {
+
         id: swipeView
         anchors.fill: parent
         currentIndex: 0

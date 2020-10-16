@@ -1,7 +1,8 @@
 # This Python file uses the following encoding: utf-8
 
-# if __name__ == "__main__":
-#     pass
+if __name__ == "__main__":
+     main()
+
 
 import sqlite3 as sl
 import datetime
@@ -25,7 +26,7 @@ def getRfidTag():
         else:
             return 0
 
-class database():
+class cDB():
     def __init__(self):
         self.CoffeeBeans = 100
 
@@ -117,7 +118,7 @@ class database():
         conn.commit()
         conn.close()
         return True
-    
+
     def getFullUserDataById(self,user_id):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
@@ -127,6 +128,7 @@ class database():
             print(row)
 
     def payCoffee(self):
+        print("payCoffe func")
         Tag = getRfidTag()
         if self.CoffeeBeans <= 5:
             print("CoffeBeans empty. Please refill")
@@ -141,17 +143,26 @@ class database():
             print("Balance too low")
             return False
 
-    
-db = database()
-db.setupDB()
+def main():
 
-if db.getUserCount() == 0:
-    db.addWG()
+    db = cDB()
+    db.setupDB()
 
-print(db.getAccountBalance(2))
-db.changeAmount(2,10)
-print(db.getAccountBalance(2))
-db.payCoffee()
-db.incCleaning(2,2)
-print(db.getAccountBalance(2))
-db.getFullUserDataById(2)
+    if db.getUserCount() == 0:
+        db.addWG()
+
+    print(db.getAccountBalance(2))
+    db.changeAmount(2,10)
+    print(db.getAccountBalance(2))
+    db.payCoffee()
+    db.incCleaning(2,2)
+    print(db.getAccountBalance(2))
+    db.getFullUserDataById(2)
+
+def setup():
+    db = cDB()
+    db.setupDB()
+
+    if db.getUserCount() == 0:
+        db.addWG()
+    return db

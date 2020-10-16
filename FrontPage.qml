@@ -6,6 +6,8 @@ import QtQuick.Controls.Imagine 2.3
 import QtQuick.Extras 1.4
 
 Page {
+
+
     title: qsTr("frontPage")
     Image {
         id: imageWT
@@ -22,7 +24,9 @@ Page {
             anchors.fill: parent
             onClicked: {
                 console.log("WT pressed");
-                swipeView.setCurrentIndex(2) }
+                swipeView.setCurrentIndex(2)
+
+                }
 
         }
     }
