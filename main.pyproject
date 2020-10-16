@@ -1,3 +1,3 @@
 {
-    "files": ["FrontPage.qml","main.py","WeeklyTasksPage.qml","main.qml","WgTasks.qml","database.py","CoffeePage.qml"]
+    "files": ["WeeklyTasksPage.qml","WgTasks.qml","CoffeePage.qml","main.qml","main.py","database.py","FrontPage.qml","backend.py"]
 }
