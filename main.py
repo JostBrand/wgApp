@@ -36,7 +36,7 @@ class MainWindow(QObject):
 
 
     payingSignal = pyqtSignal(str, arguments=['paying'])
-    qmlBeansSignal = pyqtSignal(float,name="beansValue")
+    qmlBeansSignal = pyqtSignal(float)
     @pyqtSlot()
     def paying(self):
         db.payCoffee()
@@ -47,13 +47,14 @@ class MainWindow(QObject):
     @pyqtSlot()
     def readBeans(self):
         self.t = BeansT()
-        self.t.beansSignal.connect(self.setProgressVal)
+        self.t.beansSignal.connect(self.emitBeansValue)
         self.t.start()
         print("started readBeans Thread")
 
 
-    def setProgressVal(self, val):
+    def emitBeansValue(self, val):
         print(val)
+        self.qmlBeansSignal.emit(val)
 
 
 

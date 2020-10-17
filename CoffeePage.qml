@@ -10,9 +10,9 @@ Page {
     // Example to change a label
     Connections{
         target: Coffee
-        function onQmlBeansSignal(){
+        function onQmlBeansSignal(beansValue){
             console.log("func")
-            sliderBeans.value = 1
+            sliderBeans.value = beansValue
         }
     }
 
