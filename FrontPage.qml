@@ -42,7 +42,9 @@ Page {
             anchors.fill: parent
             onClicked: {
                  console.log("Coffee pressed");
-                swipeView.setCurrentIndex(1) }
+                swipeView.setCurrentIndex(1)
+                Coffee.readBeans()
+            }
         }
     }
 

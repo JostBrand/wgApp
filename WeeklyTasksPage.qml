@@ -7,10 +7,14 @@ import QtQuick.Extras 1.4
 
 Page {
 
-    // Example to change a label
-    //Connections{
-    //    function onSaidName(){ homebuttonWTtext.text="fun"}
-    //}
+//    Connections{
+//        target: Coffee
+//        onSliderSignal: {
+//            console.log("func")
+//            homebuttonWTtext.text = "hans"
+
+//        }
+//   }
 
     id: wTPage
     title: qsTr("wtPage")

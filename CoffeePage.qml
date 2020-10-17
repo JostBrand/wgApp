@@ -7,11 +7,14 @@ import QtQuick.Extras 1.4
 
 Page {
 
-
     // Example to change a label
-    //Connections{
-    //    function onSaidName(){ homebuttonWTtext.text="fun"}
-    //}
+    Connections{
+        target: Coffee
+        function onQmlBeansSignal(){
+            console.log("func")
+            sliderBeans.value = 1
+        }
+    }
 
     title: qsTr("coffePage")
     Image {
@@ -21,7 +24,7 @@ Page {
         fillMode: Image.PreserveAspectCrop
 
         ProgressBar {
-            id: control
+            id: sliderBeans
             x: 0
             y: 0
             width: parent.width
@@ -41,7 +44,7 @@ Page {
                 implicitHeight: 4
 
                 Rectangle {
-                    width: control.visualPosition * parent.width
+                    width: sliderBeans.visualPosition * parent.width
                     height: parent.height
                     radius: 2
                     color: "#663300"
@@ -140,7 +143,7 @@ Page {
             }
 
             onClicked: {
-                payingProcess.open()
+                payingProcess.open() //Open Paying Popup window
                 Coffee.paying()
             }
         }
@@ -162,11 +165,85 @@ Page {
                 Label {
                     Text{
                         id:cleaningProcessText
-                        text:"Starting the cleaning process"
+                        text:"Cleaning type:"
                         fontSizeMode: Text.Fit
-                        font.pointSize: 18
+                        font.pointSize: 14
                         }
+
                     }
+                //buttons
+                Button {
+                    id: buttonPopupMilk
+                    x: parent.width*0.1
+                    y: parent.height*0.2
+                    width: 150
+                    height: 50
+
+                    background: Rectangle {
+                        anchors.fill:parent
+                        color: "white"
+                        border.width: 1
+                        border.color: "black"
+                        radius: 8
+                    }
+
+                    Text{
+                        id:buttonPopupMilkText
+                        text:"Milk"
+                        fontSizeMode: Text.Fit
+                        anchors.centerIn: parent
+                        font.pointSize: 18
+                    }
+                    onClicked: { cleaningProcess.open()}
+                }
+                Button {
+                    id: buttonPopupLime
+                    x: parent.width*0.1
+                    y: parent.height*0.45
+                    width: 150
+                    height: 50
+
+                    background: Rectangle {
+                        anchors.fill:parent
+                        color: "white"
+                        border.width: 1
+                        border.color: "black"
+                        radius: 8
+                    }
+
+                    Text{
+                        id:buttonPopupLimeText
+                        text:"Lime"
+                        fontSizeMode: Text.Fit
+                        anchors.centerIn: parent
+                        font.pointSize: 18
+                    }
+                    onClicked: { cleaningProcess.open()}
+                }
+                Button {
+                    id: buttonPopupFull
+                    x: parent.width*0.1
+                    y: parent.height*0.7
+                    width: 150
+                    height: 50
+
+                    background: Rectangle {
+                        anchors.fill:parent
+                        color: "white"
+                        border.width: 1
+                        border.color: "black"
+                        radius: 8
+                    }
+
+                    Text{
+                        id:buttonPopupFullText
+                        text:"Full"
+                        fontSizeMode: Text.Fit
+                        anchors.centerIn: parent
+                        font.pointSize: 18
+                    }
+                    onClicked: { cleaningProcess.open()}
+                }
                 }
         }
 
@@ -185,10 +262,18 @@ Page {
                     anchors.fill: parent
                     source: "Pictures/Payment.jpg"
                     fillMode: Image.PreserveAspectCrop
-                Label {
 
-                    text: qsTr("Please hold your NFC chip near to the reader")
+                Rectangle {
+                    width: parent.width
+                    height: parent.height/4
+                    radius: 2
+                    color: "white"
+                    Label {
+                        fontSizeMode: Text.Fit
+                        text: qsTr("Please hold your NFC chip near to the reader")
+                    }
                 }
+
 
                 }
         }
