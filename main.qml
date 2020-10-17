@@ -9,6 +9,10 @@ Window {
     id:root
     width: 1024
     height: 600
+    maximumHeight : 600
+    maximumWidth : 1024
+    minimumHeight : 600
+    minimumWidth : 1024
     visible: true
     title: qsTr("Selbstverwirklichung")
 

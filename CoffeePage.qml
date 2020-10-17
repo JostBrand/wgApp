@@ -7,6 +7,7 @@ import QtQuick.Extras 1.4
 
 Page {
 
+
     // Example to change a label
     //Connections{
     //    function onSaidName(){ homebuttonWTtext.text="fun"}
@@ -148,8 +149,8 @@ Page {
                 parent: Overlay.overlay
                 x: Math.round((parent.width - width) / 2)
                 y: Math.round((parent.height - height) / 2)
-                width: 800
-                height: 700
+                width: parent.width/2
+                height: parent.height/2
                 modal: true
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
@@ -164,10 +165,8 @@ Page {
                         text:"Starting the cleaning process"
                         fontSizeMode: Text.Fit
                         font.pointSize: 18
-
+                        }
                     }
-
-                }
                 }
         }
 
@@ -176,8 +175,8 @@ Page {
                 parent: Overlay.overlay
                 x: Math.round((parent.width - width) / 2)
                 y: Math.round((parent.height - height) / 2)
-                width: 800
-                height: 700
+                width: parent.width/2
+                height: parent.height/2
                 modal: true
                 focus: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
