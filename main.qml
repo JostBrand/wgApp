@@ -19,7 +19,6 @@ Window {
     Connections{target:Coffee}
 
     SwipeView {
-
         id: swipeView
         anchors.fill: parent
         currentIndex: 0
