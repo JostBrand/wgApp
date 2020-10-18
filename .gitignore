@@ -2,3 +2,4 @@ __pychache__/
 *.autosave
 main.pyproject.user*
 wg.db
+*.qmlc
