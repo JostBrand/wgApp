@@ -5,7 +5,7 @@
 import RPi.GPIO as GPIO
 import time
 GPIO.setmode(GPIO.BOARD) # GPIO Nummern statt Board Nummern
-GPIO.setwarnings(False)
+#GPIO.setwarnings(False)
 from mfrc522 import SimpleMFRC522
 reader = SimpleMFRC522()
 from ADS1x15 import ADS1015
