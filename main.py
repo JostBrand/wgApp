@@ -10,7 +10,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
 import database
 import random
 
-
+import backend
 
 class BeansT(QThread):
 
@@ -24,7 +24,9 @@ class BeansT(QThread):
     def run(self):
 
         while True:
-            tmp = random.uniform(0, 1)
+            tmp = float(backend.bean_height(avg=True))
+            #tmp = float(random.uniform(0,1))
+            #print("bean height returned: "+str(tmp))
             self.beansSignal.emit(tmp)
             time.sleep(5)
 
@@ -34,15 +36,12 @@ class MainWindow(QObject):
     def __init__(self,parent=None):
         super(MainWindow, self).__init__(parent)
 
-
     payingSignal = pyqtSignal(str, arguments=['paying'])
-    qmlBeansSignal = pyqtSignal(float)
+    qmlBeansSignal = pyqtSignal(float, arguments=['emitBeansValue'])
+    
     @pyqtSlot()
     def paying(self):
         db.payCoffee()
-
-    def sendbeansSignal(self,result):
-        print("sendbeansSignal func")
 
     @pyqtSlot()
     def readBeans(self):
@@ -53,16 +52,10 @@ class MainWindow(QObject):
 
 
     def emitBeansValue(self, val):
+        #print("bean height returned: "+str(val))
+        print("emitbeansValue")
         print(val)
         self.qmlBeansSignal.emit(val)
-
-
-
-
- #  @pyqtSlot()
-  #  def sliderfun(self):
-   #     print("sliderfun called")
-    #    self.sliderSignal.emit("text")
 
 
 if __name__ == "__main__":
