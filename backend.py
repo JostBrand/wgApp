@@ -77,8 +77,13 @@ def bean_height(avg=False,relative=True):
         distance = distance-MIN
         rel = distance/dif
         rel = 1-rel
-        print(rel)
-        distance=rel*100
+        #print(rel)
+        distance=rel
+        if distance<=0:
+            distance=0
+        else:
+            pass
+            
 
     else:
 
@@ -101,7 +106,7 @@ def bean_height(avg=False,relative=True):
         distance = averaged/0.000058
         print("Distance: {} cm".format(distance))
 
-    return np.around(distance,decimals=0)
+    return np.around(distance,decimals=2)
     GPIO.cleanup()
 
 def ready_check():
@@ -153,7 +158,10 @@ def ready_check():
     GPIO.cleanup()
 
 #beanheight=bean_height(avg=True)
-#print(beanheight)
+print(bean_height(avg=True))
 #ready= ready_check()
-print(scan_rfid())
+#for i in range(0,3):
+#	print(scan_rfid())
+#	time.sleep(2)
+
 #start_button()
