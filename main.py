@@ -29,35 +29,46 @@ class RfidT(QThread):
         self.RfidSignal.emit(tag)
         if db.payCoffee(tag):
             backend.start_button()
-        self.terminate()
+    
+    def stop(self):
+        backend.GPIO.cleanup()
+        self.stop()
         self.wait()
 
 class BeansT(QThread):
 
     def __init__(self):
         QThread.__init__(self)
+        self.threadactive = True
 
     def __del__(self):
         self.wait()
 
     beansSignal = pyqtSignal(float, name="beansValue")
-
+    
     def run(self):
 
-        while True:
+        while self.threadactive:
             tmp = float(backend.bean_height(avg=True))
             self.beansSignal.emit(tmp)
             time.sleep(5)
+    
+    def stop(self):
+        print("closeReadBeans")
+        self.threadactive = False
+        self.wait()
 
 
 class MainWindow(QObject):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+        self.t = BeansT()
 
     payingSignal = pyqtSignal(str, arguments=['paying'])
     qmlBeansSignal = pyqtSignal(float, arguments=['emitBeansValue'])
     qmlRfidSignal = pyqtSignal(str,arguments=['emitRfidTag'])
+
 
     @pyqtSlot()
     def paying(self):
@@ -65,7 +76,6 @@ class MainWindow(QObject):
 
     @pyqtSlot()
     def readBeans(self):
-        self.t = BeansT()
         self.t.beansSignal.connect(self.emitBeansValue)
         self.t.start()
 
@@ -74,6 +84,10 @@ class MainWindow(QObject):
         print("emitbeansValue")
         print(val)
         self.qmlBeansSignal.emit(val)
+
+    @pyqtSlot()
+    def closeReadBeans(self):
+        self.t.stop()
 
     @pyqtSlot()
     def readRfid(self):
@@ -87,17 +101,23 @@ class MainWindow(QObject):
         self.qmlRfidSignal.emit(val)
 
 
+
+
 if __name__ == "__main__":
-    logging.info("Application started")
+    try:
+        logging.info("Application started")
 
-    app = QGuiApplication(sys.argv)
-    engine = QQmlApplicationEngine()
-    db = database.setup()
-    win = MainWindow()
-    engine.rootContext().setContextProperty("Coffee", win)
-    engine.load(os.path.join(os.path.dirname(__file__), "main.qml"))
-    
+        app = QGuiApplication(sys.argv)
+        engine = QQmlApplicationEngine()
+        db = database.setup()
+        win = MainWindow()
+        engine.rootContext().setContextProperty("Coffee", win)
+        engine.load(os.path.join(os.path.dirname(__file__), "main.qml"))
 
-    if not engine.rootObjects():
-        sys.exit(-1)
-    sys.exit(app.exec_())
+
+        if not engine.rootObjects():
+            sys.exit(-1)
+        sys.exit(app.exec_())
+    except (KeyboardInterrupt, SystemExit):
+        
+        sys.exit()

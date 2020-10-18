@@ -93,7 +93,9 @@ Page {
                 radius: 8
             }
 
-            onClicked: { swipeView.setCurrentIndex(0)}
+            onClicked: { swipeView.setCurrentIndex(0)
+                        Coffee.closeReadBeans()
+                        }
         }
 
         Button {
