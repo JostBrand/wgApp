@@ -15,6 +15,11 @@ Page {
             sliderBeans.value = beansValue
         }
 	onQmlBeansSignal:{sliderBeans.value = emitBeansValue}
+    onQmlRfidSignal:{
+                if (emitRfidTag != "") {
+            payingProcess.close()
+        }
+    }
     }
 
     title: qsTr("coffePage")

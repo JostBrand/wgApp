@@ -16,13 +16,11 @@ import sqlite3
 dbname = 'wg.db'
 priceCoffe= 0.35
 
-def systemlogger(logmsg):
+def systemlogger(logmsg,tag):
     dt = datetime.datetime.now()
     with open("systemlog.txt", "a") as myfile:
-    myfile.write(dt + "--- action: "+ logmsg)
+        myfile.write(dt + "--- action: "+ logmsg + "by user: "+tag)
 
-def startButton():
-    return None
 
 def getRfidTag():
         grabbing = True
@@ -49,8 +47,8 @@ class cDB():
             Amount REAL,
             CleaningMilkCounter INTEGER,
             CleaningFullCounter INTEGER,
-            CleaningLime INTEGER
-            CoffesTaken INTEGER
+            CleaningLime INTEGER,
+            CoffesTaken INTEGER,
             ReFunds INTEGER
         );
     """)
@@ -60,19 +58,19 @@ class cDB():
     def addWG(self):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
-        sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime,ReFunds) values(?, ?, ?,?,?,?,?,?,?,?)'
+        sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime,CoffesTaken,ReFunds) values(?, ?, ?,?,?,?,?,?,?,?)'
         data = [
-    (1, 'Jost', 1,"441850866162",0.0,0,0,0,0,0),
-    (2, 'Alex', 1"535544663601",0.0,0,0,0,0,0),
-    (3, 'Jarno', 2,"577279633739",0.0,0,0,0,0,0),
+    (1, 'Jost', 1,"441850866162"  ,5.0,0,0,0,0,0),
+    (2, 'Alex', 1,"535544663601"  ,0.0,0,0,0,0,0),
+    (3, 'Jarno', 2,"577279633739" ,0.0,0,0,0,0,0),
     (4, 'Miriem', 2,"575681407471",0.0,0,0,0,0,0),
-    (5, 'OktMb', 3,"371127429628",0.0,0,0,0,0,0),
-    (6, 'Amir', 3,"440087554427",0.0,0,0,0,0,0),
-    (7, 'Jonas', 4,"576080062850",0.0,0,0,0,0,0),
+    (5, 'OktMb', 3,"371127429628" ,0.0,0,0,0,0,0),
+    (6, 'Amir', 3,"440087554427"  ,10.0,0,0,0,0,0),
+    (7, 'Jonas', 4,"576080062850" ,0.0,0,0,0,0,0),
     (8, 'Sharon', 4,"327982457717",0.0,0,0,0,0,0),
-    (9, 'Tij', 5,"465768615401",0.0,0,0,0,0,0),
-    (10, 'Felix', 5,"438374246778",0.0,0,0,0,0,0),
-    (11, 'Kira', 6,"442358835477",0.0,0,0,0,0,0)
+    (9, 'Tij', 5,"465768615401"   ,0.0,0,0,0,0,0),
+    (10, 'Felix', 5,"438374246778",5.0,0,0,0,0,0),
+    (11, 'Kira', 6,"442358835477" ,0.0,0,0,0,0,0)
 ]
         c.executemany(sql,data)
         conn.commit()
@@ -113,10 +111,13 @@ class cDB():
         c = conn.cursor()
         if cleaningType == 0:
                 cleaningType = "CleaningMilkCounter"
+                systemlogger("Milktube Cleaned",user_id)
         elif cleaningType == 1:
                 cleaningType = "CleaningFullCounter"
+                systemlogger("Full Clean",user_id)
         elif cleaningType == 2:
                 cleaningType = "CleaningLime"
+                systemlogger("Lime Clean",user_id)
         else:
             return None
 
@@ -124,6 +125,7 @@ class cDB():
         c.execute(sql_inc)
         conn.commit()
         conn.close()
+
         return True
 
     def getFullUserDataById(self,user_id):
@@ -134,16 +136,17 @@ class cDB():
         for row in result:
             print(row)
 
-    def payCoffee(self):
+    def payCoffee(self,tag):
         print("payCoffe func")
-        Tag = getRfidTag()
-        if self.CoffeeBeans <= 5:
+        if self.CoffeeBeans <= 0.15:
             print("CoffeBeans empty. Please refill")
             return False
-        balance = self.getAccountBalance(Tag)
+        balance = self.getAccountBalance(tag)
         if balance >= priceCoffe:
-            startButton()
-            self.changeAmount(Tag,balance-priceCoffe)
+            newBalance = balance-priceCoffe
+            self.changeAmount(tag,newBalance)
+            print(f"Your new balance is {newBalance}")
+            systemlogger("Coffee Taken",tag)
             return True
         else:
             #CLose Popup; balance too low

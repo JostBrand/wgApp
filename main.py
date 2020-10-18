@@ -25,16 +25,12 @@ class RfidT(QThread):
     def run(self):
         now = time.time()
         end = now + 30
-        tag = None
-        while time.time() < end:
-            if tag is None:
-                tag = str(backend.scan_rfid())
-            else:
-                self.RfidSignal.emit(tag)
-                break
-        time.sleep(10)
-        self.RfidSignal.emit("")
+        tag = str(backend.scan_rfid())
+        self.RfidSignal.emit(tag)
+        if db.payCoffee(tag):
+            backend.start_button()
         self.terminate()
+        self.wait()
 
 class BeansT(QThread):
 
@@ -50,8 +46,6 @@ class BeansT(QThread):
 
         while True:
             tmp = float(backend.bean_height(avg=True))
-            #tmp = float(random.uniform(0,1))
-            #print("bean height returned: "+str(tmp))
             self.beansSignal.emit(tmp)
             time.sleep(5)
 
@@ -60,16 +54,14 @@ class MainWindow(QObject):
 
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.activeTag =""
 
     payingSignal = pyqtSignal(str, arguments=['paying'])
     qmlBeansSignal = pyqtSignal(float, arguments=['emitBeansValue'])
-    qmlRfidSignal = pyqtSignal(str)
+    qmlRfidSignal = pyqtSignal(str,arguments=['emitRfidTag'])
 
     @pyqtSlot()
     def paying(self):
         self.readRfid()
-        db.payCoffee(self.activeTag)
 
     @pyqtSlot()
     def readBeans(self):
@@ -93,7 +85,6 @@ class MainWindow(QObject):
     def emitRfidTag(self, val):
         print("RfidTag" + val)
         self.qmlRfidSignal.emit(val)
-        self.activeTag=val
 
 
 if __name__ == "__main__":
@@ -105,6 +96,7 @@ if __name__ == "__main__":
     win = MainWindow()
     engine.rootContext().setContextProperty("Coffee", win)
     engine.load(os.path.join(os.path.dirname(__file__), "main.qml"))
+    
 
     if not engine.rootObjects():
         sys.exit(-1)
