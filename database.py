@@ -16,6 +16,11 @@ import sqlite3
 dbname = 'wg.db'
 priceCoffe= 0.35
 
+def systemlogger(logmsg):
+    dt = datetime.datetime.now()
+    with open("systemlog.txt", "a") as myfile:
+    myfile.write(dt + "--- action: "+ logmsg)
+
 def startButton():
     return None
 
@@ -40,11 +45,13 @@ class cDB():
             id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             GroupNr INTEGER,
-            RfidTag INTEGER,
+            RfidTag TEXT,
             Amount REAL,
             CleaningMilkCounter INTEGER,
             CleaningFullCounter INTEGER,
             CleaningLime INTEGER
+            CoffesTaken INTEGER
+            ReFunds INTEGER
         );
     """)
         conn.commit()
@@ -53,19 +60,19 @@ class cDB():
     def addWG(self):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
-        sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime) values(?, ?, ?,?,?,0,0,0)'
+        sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime,ReFunds) values(?, ?, ?,?,?,?,?,?,?,?)'
         data = [
-    (1, 'Jost', 1,2,0),
-    (2, 'Alex', 1,0,0),
-    (3, 'Jarno', 2,0,0),
-    (4, 'Miriem', 2,0,0),
-    (5, 'Christan', 3,0,0),
-    (6, 'Amir', 3,0,0),
-    (7, 'Jonas', 4,0,0),
-    (8, 'Sahron', 4,0,0),
-    (9, 'Tij', 5,0,0),
-    (10, 'Felix', 5,0,0),
-    (11, 'Kira', 6,0,0)
+    (1, 'Jost', 1,"441850866162",0.0,0,0,0,0,0),
+    (2, 'Alex', 1"535544663601",0.0,0,0,0,0,0),
+    (3, 'Jarno', 2,"577279633739",0.0,0,0,0,0,0),
+    (4, 'Miriem', 2,"575681407471",0.0,0,0,0,0,0),
+    (5, 'OktMb', 3,"371127429628",0.0,0,0,0,0,0),
+    (6, 'Amir', 3,"440087554427",0.0,0,0,0,0,0),
+    (7, 'Jonas', 4,"576080062850",0.0,0,0,0,0,0),
+    (8, 'Sharon', 4,"327982457717",0.0,0,0,0,0,0),
+    (9, 'Tij', 5,"465768615401",0.0,0,0,0,0,0),
+    (10, 'Felix', 5,"438374246778",0.0,0,0,0,0,0),
+    (11, 'Kira', 6,"442358835477",0.0,0,0,0,0,0)
 ]
         c.executemany(sql,data)
         conn.commit()
@@ -84,7 +91,7 @@ class cDB():
     def getAccountBalance(self,RfidTag):
        conn = sqlite3.connect(dbname)
        c = conn.cursor()
-       sql_get = 'SELECT Amount FROM USER WHERE RfidTag=={}'.format(RfidTag)
+       sql_get = 'SELECT Amount FROM USER WHERE RfidTag=="{}"'.format(RfidTag)
        c.execute(sql_get)
        result = c.fetchone()[0]
        conn.commit()
@@ -94,7 +101,7 @@ class cDB():
     def changeAmount(self,RfidTag,charge):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
-        sql_set = 'UPDATE USER SET Amount={} WHERE RfidTag={}'.format(charge,RfidTag)
+        sql_set = 'UPDATE USER SET Amount={} WHERE RfidTag="{}"'.format(charge,RfidTag)
         c.execute(sql_set)
         conn.commit()
         conn.close()

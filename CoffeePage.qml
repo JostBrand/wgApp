@@ -14,6 +14,7 @@ Page {
             console.log("func")
             sliderBeans.value = beansValue
         }
+	onQmlBeansSignal:{sliderBeans.value = emitBeansValue}
     }
 
     title: qsTr("coffePage")
@@ -123,7 +124,6 @@ Page {
             y: parent.height*0.8
             width: parent.width/5
             height:parent.height/6
-
 
             background: Rectangle {
                 anchors.fill:parent

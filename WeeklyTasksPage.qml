@@ -97,7 +97,6 @@ Page {
             delegate: tasksDelegate
         }
     }
-
 }
 
 /*##^##

@@ -43,6 +43,7 @@ def bean_height(avg=False,relative=True):
     TRIG=29
     ECHO=31
 
+    GPIO.setmode(GPIO.BOARD)
     GPIO.setup(TRIG, GPIO.OUT)
     GPIO.setup(ECHO, GPIO.IN)
 

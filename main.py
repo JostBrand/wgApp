@@ -3,24 +3,49 @@ import sys
 import os
 import time
 
-from PyQt5.QtGui import QGuiApplication
+from PyQt5.QtGui import QGuiApplication, QKeySequence
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
-
+from PyQt5.QtWidgets import QShortcut
 import database
 import random
-
+import logging
 import backend
+
+class RfidT(QThread):
+
+    def __init__(self):
+        QThread.__init__(self)
+
+    def __del__(self):
+        self.wait()
+
+    RfidSignal = pyqtSignal(str)
+
+    def run(self):
+        now = time.time()
+        end = now + 30
+        tag = None
+        while time.time() < end:
+            if tag is None:
+                tag = str(backend.scan_rfid())
+            else:
+                self.RfidSignal.emit(tag)
+                break
+        time.sleep(10)
+        self.RfidSignal.emit("")
+        self.terminate()
 
 class BeansT(QThread):
 
     def __init__(self):
-     QThread.__init__(self)
+        QThread.__init__(self)
 
-     def __del__(self):
-         self.wait()
+    def __del__(self):
+        self.wait()
 
-    beansSignal = pyqtSignal(float,name="beansValue")
+    beansSignal = pyqtSignal(float, name="beansValue")
+
     def run(self):
 
         while True:
@@ -33,23 +58,24 @@ class BeansT(QThread):
 
 class MainWindow(QObject):
 
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
+        self.activeTag =""
 
     payingSignal = pyqtSignal(str, arguments=['paying'])
     qmlBeansSignal = pyqtSignal(float, arguments=['emitBeansValue'])
-    
+    qmlRfidSignal = pyqtSignal(str)
+
     @pyqtSlot()
     def paying(self):
-        db.payCoffee()
+        self.readRfid()
+        db.payCoffee(self.activeTag)
 
     @pyqtSlot()
     def readBeans(self):
         self.t = BeansT()
         self.t.beansSignal.connect(self.emitBeansValue)
         self.t.start()
-        print("started readBeans Thread")
-
 
     def emitBeansValue(self, val):
         #print("bean height returned: "+str(val))
@@ -57,8 +83,22 @@ class MainWindow(QObject):
         print(val)
         self.qmlBeansSignal.emit(val)
 
+    @pyqtSlot()
+    def readRfid(self):
+        self.t2 = RfidT()
+        self.t2.RfidSignal.connect(self.emitRfidTag)
+        self.t2.start()
+        print("thread rfid started")
+
+    def emitRfidTag(self, val):
+        print("RfidTag" + val)
+        self.qmlRfidSignal.emit(val)
+        self.activeTag=val
+
 
 if __name__ == "__main__":
+    logging.info("Application started")
+
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
     db = database.setup()
