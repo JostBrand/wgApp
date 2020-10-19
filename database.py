@@ -19,7 +19,7 @@ priceCoffe= 0.35
 def systemlogger(logmsg,tag):
     dt = datetime.datetime.now()
     with open("systemlog.txt", "a") as myfile:
-        myfile.write(dt + "--- action: "+ logmsg + "by user: "+tag)
+        myfile.write(str(dt) + "--- action: "+ logmsg + "by user: "+str(tag)+("\n"))
 
 
 def getRfidTag():
@@ -107,25 +107,29 @@ class cDB():
 
     #3 Cleaning buttons
     def incCleaning(self,cleaningType,user_id):
+
+        if user_id is None:
+            systemlogger("inCleaning failed - User ID None","NA")
+            return False
+
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
-        if cleaningType == 0:
+        if cleaningType == "Milk":
                 cleaningType = "CleaningMilkCounter"
                 systemlogger("Milktube Cleaned",user_id)
-        elif cleaningType == 1:
+        elif cleaningType == "Full":
                 cleaningType = "CleaningFullCounter"
                 systemlogger("Full Clean",user_id)
-        elif cleaningType == 2:
+        elif cleaningType == "Lime":
                 cleaningType = "CleaningLime"
                 systemlogger("Lime Clean",user_id)
         else:
             return None
 
-        sql_inc = 'UPDATE USER SET {}={}+1 WHERE id = {}'.format(cleaningType,cleaningType,user_id)
+        sql_inc = f'UPDATE USER SET {cleaningType}={cleaningType}+1 WHERE id = {user_id}'
         c.execute(sql_inc)
         conn.commit()
         conn.close()
-
         return True
 
     def getFullUserDataById(self,user_id):
@@ -139,7 +143,7 @@ class cDB():
     def payCoffee(self,tag):
         print("payCoffe func")
         if self.CoffeeBeans <= 0.15:
-            print("CoffeBeans empty. Please refill")
+            print("CoffeBeans empty. Please refill or check Sensor")
             return False
         balance = self.getAccountBalance(tag)
         if balance >= priceCoffe:

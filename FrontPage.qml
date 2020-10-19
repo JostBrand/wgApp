@@ -41,9 +41,9 @@ Page {
             id: mouseAreaCoffee
             anchors.fill: parent
             onClicked: {
-                 console.log("Coffee pressed");
+                console.log("Coffee pressed");
                 swipeView.setCurrentIndex(1)
-                //Coffee.readBeans()
+                Coffee.readBeans()
             }
         }
     }

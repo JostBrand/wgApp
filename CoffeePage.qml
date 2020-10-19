@@ -10,15 +10,30 @@ Page {
     // Example to change a label
     Connections{
         target: Coffee
-        function onQmlBeansSignal(beansValue){
-            console.log("func")
-            sliderBeans.value = beansValue
-        }
+
 	onQmlBeansSignal:{sliderBeans.value = emitBeansValue}
     onQmlRfidSignal:{
-                if (emitRfidTag != "") {
-            payingProcess.close()
+                if (emitRfidTag != "")
+                 {                    
+                    if (payingProcess.activeFocus)
+                    {
+                        payingProcess.close()
+                    }
+                    if (cleaningAuth.activeFocus)
+                    {
+                        cleaningAuth.close()
+                        cleaningProcess.open()
+                    }
+                }
+    }
+    onQmlReadySignal:{
+        console.log("ready signal qml check")
+        if (emitReadyValue == false){
+            readyCircle.color = "red"    
         }
+        else{
+            readyCircle.color = "green"  
+        }        
     }
     }
 
@@ -68,6 +83,25 @@ Page {
                 font.pointSize: 29
             }
         }
+
+        Rectangle {
+         id: readyCircle
+         x: parent.width*0.02
+         y: parent.height*0.95
+         width: 30
+         height: 30
+         color: "red"
+         border.color: "black"
+         border.width: 1
+         radius: width*0.5
+         Text {
+              anchors.fill: parent
+              color: "red"
+              text: " "
+         }
+    }
+
+
         Button {
             id: homebuttonCoffee
             x: parent.width-150-50
@@ -93,9 +127,10 @@ Page {
                 radius: 8
             }
 
-            onClicked: { swipeView.setCurrentIndex(0)
+            onClicked: { 
+                        swipeView.setCurrentIndex(0)
                         Coffee.closeReadBeans()
-                        }
+                    }
         }
 
         Button {
@@ -122,7 +157,10 @@ Page {
             }
             anchors.right: parent.right
             anchors.rightMargin: 50
-            onClicked: { cleaningProcess.open()}
+            onClicked: { 
+                        cleaningAuth.open()
+                        Coffee.cleaningAuth()
+                        }
         }
 
         Button {
@@ -155,6 +193,34 @@ Page {
             }
         }
         Popup {
+                id: cleaningAuth
+                parent: Overlay.overlay
+                x: Math.round((parent.width - width) / 2)
+                y: Math.round((parent.height - height) / 2)
+                width: parent.width/2
+                height: parent.height/2
+                modal: true
+                focus: true
+                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                Image {
+                    id: cleaningAuthImage
+                    anchors.fill: parent
+                    source: "Pictures/CleaningProcess.jpg"
+                    fillMode: Image.PreserveAspectCrop
+                Label {
+                    Text{
+                        id:cleaningAuthImageText
+                        text:"Please login"
+                        fontSizeMode: Text.Fit
+                        font.pointSize: 14
+                        }
+
+                    }
+                }
+        }
+
+
+        Popup {
                 id: cleaningProcess
                 parent: Overlay.overlay
                 x: Math.round((parent.width - width) / 2)
@@ -163,21 +229,21 @@ Page {
                 height: parent.height/2
                 modal: true
                 focus: true
-                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
                 Image {
                     id: cleaningProcessImage
                     anchors.fill: parent
                     source: "Pictures/CleaningProcess.jpg"
                     fillMode: Image.PreserveAspectCrop
-                Label {
-                    Text{
-                        id:cleaningProcessText
-                        text:"Cleaning type:"
-                        fontSizeMode: Text.Fit
-                        font.pointSize: 14
-                        }
-
-                    }
+                        Label {
+                            Text{
+                                id:cleaningProcessText
+                                text:"Cleaning type:"
+                                fontSizeMode: Text.Fit
+                                font.pointSize: 14
+                                }
+                            }
                 //buttons
                 Button {
                     id: buttonPopupMilk
@@ -201,7 +267,9 @@ Page {
                         anchors.centerIn: parent
                         font.pointSize: 18
                     }
-                    onClicked: { cleaningProcess.open()}
+                    onClicked: { Coffee.cleaningMilk()
+                                cleaningProcess.close()
+                    }
                 }
                 Button {
                     id: buttonPopupLime
@@ -225,7 +293,10 @@ Page {
                         anchors.centerIn: parent
                         font.pointSize: 18
                     }
-                    onClicked: { cleaningProcess.open()}
+                    onClicked: { cleaningFullPopup.open()
+                                 cleaningProcess.close()
+                                 Coffee.cleaningType = "Lime"
+                                 }
                 }
                 Button {
                     id: buttonPopupFull
@@ -249,7 +320,92 @@ Page {
                         anchors.centerIn: parent
                         font.pointSize: 18
                     }
-                    onClicked: { cleaningProcess.open()}
+                    onClicked: { cleaningFullPopup.open()
+                                 cleaningProcess.close()
+                                 Coffee.cleaningType = "Full"}
+                }
+            }
+        }
+        Popup {
+                id: cleaningFullPopup
+                parent: Overlay.overlay
+                x: Math.round((parent.width - width) / 2)
+                y: Math.round((parent.height - height) / 2)
+                width: parent.width/2
+                height: parent.height/2
+                modal: true
+                focus: true
+                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                Image {
+                    id: cleaningProcessImageFullPopup
+                    anchors.fill: parent
+                    source: "Pictures/CleaningProcess.jpg"
+                    fillMode: Image.PreserveAspectCrop
+                Label {
+                    Text{
+                        id:cleaningProcessFullPopupText
+                        text:"Cleaning type:"
+                        fontSizeMode: Text.Fit
+                        font.pointSize: 14
+                        }
+
+                    }
+                //buttons
+                Button {
+                    id: cleaningFullPopupStart
+                    x: parent.width*0.1
+                    y: parent.height*0.2
+                    width: 150
+                    height: 50
+
+                    background: Rectangle {
+                        anchors.fill:parent
+                        color: "white"
+                        border.width: 1
+                        border.color: "black"
+                        radius: 8
+                    }
+
+                    Text{
+                        id:cleaningFullPopupStartText
+                        text:"Run"
+                        fontSizeMode: Text.Fit
+                        anchors.centerIn: parent
+                        font.pointSize: 18
+                    }
+                    onClicked: {
+                                 Coffee.cleaningFull()
+                                 Coffee.cleaningCounter = Coffee.cleaningCounter +1
+                    }
+                }
+                Button {
+                    id: cleaningFullPopupFinish
+                    x: parent.width*0.1
+                    y: parent.height*0.45
+                    width: 150
+                    height: 50
+
+                    background: Rectangle {
+                        anchors.fill:parent
+                        color: "white"
+                        border.width: 1
+                        border.color: "black"
+                        radius: 8
+                    }
+
+                    Text{
+                        id:cleaningFullPopupFinishText
+                        text:"Finish"
+                        fontSizeMode: Text.Fit
+                        anchors.centerIn: parent
+                        font.pointSize: 18
+                    }
+                    onClicked: { 
+                                cleaningFullPopup.close()
+                                 Coffee.incCleaning(Coffee.cleaningType)
+                                 Coffee.cleaningCouter = 0
+                    // TODO: Guthaben aufladen
+                    }
                 }
                 }
         }
@@ -263,7 +419,7 @@ Page {
                 height: parent.height/2
                 modal: true
                 focus: true
-                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
                 Image {
                     id: payingProcessImage
                     anchors.fill: parent
