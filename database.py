@@ -94,6 +94,15 @@ class cDB():
         conn.close()
         return result != 0
 
+    def getAccountName(self,RfidTag):
+        conn = sqlite3.connect(dbname)
+        c = conn.cursor()
+        sql_get = 'SELECT name FROM USER WHERE RfidTag=="{}"'.format(RfidTag)
+        c.execute(sql_get)
+        result = c.fetchone()[0]
+        conn.commit()
+        conn.close()
+        return result
 
     def getAccountBalance(self,RfidTag):
        conn = sqlite3.connect(dbname)

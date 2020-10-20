@@ -15,7 +15,7 @@ Page {
 
     onQmlRfidSignal:{
                 console.log("onQmlRfidSignal")
-                if (emitRfidTag != 0)
+                if (emitRfidTag != "")
                  {
                     if (payingProcess.activeFocus)
                     {
@@ -29,7 +29,6 @@ Page {
                 }
     }
     onQmlReadySignal:{
-        console.log("ready signal qml check")
         if (emitReadyValue == false){
             readyCircle.color = "red"
         }
@@ -297,7 +296,7 @@ Page {
                     }
                     onClicked: { cleaningFullPopup.open()
                                  cleaningProcess.close()
-                                 Coffee.cleaningType = "Lime"
+                                 Coffee.setCleaningLime()
                                  }
                 }
                 Button {
@@ -324,7 +323,7 @@ Page {
                     }
                     onClicked: { cleaningFullPopup.open()
                                  cleaningProcess.close()
-                                 Coffee.cleaningType = "Full"}
+                                 Coffee.setCleaningFull()}
                 }
             }
         }
@@ -376,7 +375,7 @@ Page {
                         font.pointSize: 18
                     }
                     onClicked: {
-                                 Coffee.cleaningFull()
+                                 Coffee.press_start()
                                  Coffee.cleaningCounter = Coffee.cleaningCounter +1
                     }
                 }
@@ -404,7 +403,7 @@ Page {
                     }
                     onClicked: {
                                 cleaningFullPopup.close()
-                                 Coffee.incCleaning(Coffee.cleaningType)
+                                 Coffee.incCleaning()
                                  Coffee.cleaningCouter = 0
                     // TODO: Guthaben aufladen
                     }

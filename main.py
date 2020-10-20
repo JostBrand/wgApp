@@ -22,7 +22,7 @@ class RfidT(QThread):
         self.usage = 0
         self.threadactive = True
 
-    RfidSignal = pyqtSignal(int)
+    RfidSignal = pyqtSignal(str)
 
     def __del__(self):
         self.wait()
@@ -30,22 +30,19 @@ class RfidT(QThread):
     def run(self):
         tag = None
         self.threadactive = True
+
         while self.threadactive and tag is None:
             tag = backend.scan_rfid()
 
         if db.tagExists(tag):
-            print(tag)
-            print(type(tag))
+            tag = str(tag)
             self.RfidSignal.emit(tag)
             if self.usage and db.payCoffee(str(tag)):
                 backend.start_button()
+                self.RfidSignal.emit("")
 
-        self.RfidSignal.emit(0)
         print("Rfid Thread Done..")
 
-    def stop(self):
-        self.threadactive = False
-        self.wait()
 
 class ReadyT(QThread):
     def __init__(self):
@@ -68,6 +65,7 @@ class ReadyT(QThread):
         self.threadactive = False
         self.wait()
 
+
 class BeansT(QThread):
 
     def __init__(self):
@@ -86,8 +84,6 @@ class BeansT(QThread):
             self.beansSignal.emit(float(val))
             if self.threadactive:
                 time.sleep(0.5)
-        print("closeReadBeans")
-        self.quit()
 
     def stop(self):
         self.threadactive = False
@@ -108,26 +104,45 @@ class MainWindow(QObject):
         self.ready = False
         self.cleaningType = "x"
 
-
     payingSignal = pyqtSignal(str, arguments=['paying'])
     qmlBeansSignal = pyqtSignal(float, arguments=['emitBeansValue'])
-    qmlRfidSignal = pyqtSignal(str,arguments=['emitRfidTag'])
-    qmlReadySignal = pyqtSignal(bool,arguments=['emitReadyValue'])
+    qmlRfidSignal = pyqtSignal(str, arguments=['emitRfidTag'])
+    qmlReadySignal = pyqtSignal(bool, arguments=['emitReadyValue'])
 
     @pyqtSlot()
     def closeRfidThread(self):
-        self.t2.stop()
-
+        self.t2.threadactive = False
+        if self.t2.isFinished():
+            print("RFID thread closed.")
 
     @pyqtSlot()
     def cleaningMilk(self):
-        print("cleaningMilkCalled")
+        print(f"{db.getAccountName(self.activeTag)}  {self.activeTag} has cleaned the milk tank")
         backend.start_button()
-        db.incCleaning("Milk",self.activeTag)
+        db.incCleaning("Milk", self.activeTag)
+        self.activeTag = None
+
+    @pyqtSlot()
+    def setCleaningLime(self):
+        self.cleaningType = "Lime"
+
+    @pyqtSlot()
+    def setCleaningFull(self):
+        self.cleaningType = "Full"
+
+
+    @pyqtSlot()
+    def incCleaning(self):
+        print(f"{db.getAccountName(self.activeTag)} has done a {self.cleaningType} cleaning.")
+        db.incCleaning(self.cleaningType, self.activeTag)
+        self.activeTag = None
+
+
 
     @pyqtSlot()
     def press_start(self):
         backend.start_button()
+
 
     @pyqtSlot()
     def cleaningAuth(self):
@@ -135,10 +150,9 @@ class MainWindow(QObject):
 
     @pyqtSlot()
     def paying(self):
-        print(f"Paying for Coffe: Coffeemaker is {self.ready}")
+        print(f"Coffeemaker is {self.ready}")
         if self.ready or debug_ready:
             self.readRfid(1)
-
 
     @pyqtSlot()
     def startReadyT(self):
@@ -146,15 +160,15 @@ class MainWindow(QObject):
 
     @pyqtSlot()
     def readBeans(self):
-        #dont place connect in the func do it in the init!
+        # dont place connect in the func do it in the init!
         self.t.start()
 
-    def emitReadyValue(self,val):
+    def emitReadyValue(self, val):
         self.ready = val
         self.qmlReadySignal.emit(val)
 
     def emitBeansValue(self, val):
-        print("emitbeansValue" + str(val))
+        print("Beans Height:" + str(val) + "\n")
         self.qmlBeansSignal.emit(val)
 
     @pyqtSlot()
@@ -163,15 +177,14 @@ class MainWindow(QObject):
         self.t1.stop()
 
     @pyqtSlot()
-    def readRfid(self,usage):
+    def readRfid(self, usage):
         self.t2.usage = usage
         self.t2.start()
-        #self.t2.RfidSignal.connect(self.emitRfidTag)
-        print("thread rfid started")
+        print("RFID Thread started.")
 
-    @pyqtSlot()
     def emitRfidTag(self, val):
-        print("RfidTag " + str(val))
+        if len(val) > 3:
+            print(f"RFID-Tag: {str(val)} ({db.getAccountName(val)}) logged in.")
         self.activeTag = val
         self.qmlRfidSignal.emit(val)
 

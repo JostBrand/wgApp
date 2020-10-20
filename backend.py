@@ -5,7 +5,7 @@
 import RPi.GPIO as GPIO
 import time
 
-#GPIO.setwarnings(False)
+
 from mfrc522 import SimpleMFRC522
 
 from ADS1x15 import ADS1015
@@ -20,20 +20,16 @@ ECHO=31
 
 
 def raspi_gpio_init():
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD) # GPIO Nummern statt Board Nummern
 
-
-    #GPIO.setwarnings(False)
     GPIO.setup(RELAIS_1_GPIO, GPIO.OUT) # GPIO Modus zuweisen
     GPIO.setup(RELAIS_2_GPIO, GPIO.OUT) # GPIO Modus zuweisen
-
 
     #rfid object
     #reader = SimpleMFRC522()
 
     #own Reader
-
-
 
     GPIO.setup(TRIG, GPIO.OUT)
     GPIO.setup(ECHO, GPIO.IN)
