@@ -44,6 +44,7 @@ Page {
                 console.log("Coffee pressed");
                 swipeView.setCurrentIndex(1)
                 Coffee.readBeans()
+                Coffee.startReadyT()
             }
         }
     }

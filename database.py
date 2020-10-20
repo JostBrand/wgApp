@@ -1,9 +1,5 @@
 # This Python file uses the following encoding: utf-8
 
-if __name__ == "__main__":
-     main()
-
-
 import sqlite3 as sl
 import datetime
 
@@ -60,7 +56,7 @@ class cDB():
         c = conn.cursor()
         sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime,CoffesTaken,ReFunds) values(?, ?, ?,?,?,?,?,?,?,?)'
         data = [
-    (1, 'Jost', 1,"441850866162"  ,5.0,0,0,0,0,0),
+    (1, 'Jost', 1,"441850866162"  ,500.0,0,0,0,0,0),
     (2, 'Alex', 1,"535544663601"  ,0.0,0,0,0,0,0),
     (3, 'Jarno', 2,"577279633739" ,0.0,0,0,0,0,0),
     (4, 'Miriem', 2,"575681407471",0.0,0,0,0,0,0),
@@ -85,6 +81,19 @@ class cDB():
         conn.commit()
         conn.close()
         return result
+
+    def tagExists(self,RfidTag=None):
+        if RfidTag is None:
+            return False
+        conn = sqlite3.connect(dbname)
+        c = conn.cursor()
+        sql = 'SELECT COUNT(*) FROM USER WHERE RfidTag = "{}"'.format(RfidTag)
+        c.execute(sql)
+        result = c.fetchone()[0]
+        conn.commit()
+        conn.close()
+        return result != 0
+
 
     def getAccountBalance(self,RfidTag):
        conn = sqlite3.connect(dbname)
@@ -157,21 +166,15 @@ class cDB():
             print("Balance too low")
             return False
 
-def main():
 
+if __name__ == "__main__":
     db = cDB()
     db.setupDB()
 
     if db.getUserCount() == 0:
         db.addWG()
 
-    print(db.getAccountBalance(2))
-    db.changeAmount(2,10)
-    print(db.getAccountBalance(2))
-    db.payCoffee()
-    db.incCleaning(2,2)
-    print(db.getAccountBalance(2))
-    db.getFullUserDataById(2)
+    print(db.tagExists())
 
 def setup():
     db = cDB()

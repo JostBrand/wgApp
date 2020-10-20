@@ -7,14 +7,16 @@ import QtQuick.Extras 1.4
 
 Page {
 
-    // Example to change a label
+    // Example to change a label aa
     Connections{
         target: Coffee
 
 	onQmlBeansSignal:{sliderBeans.value = emitBeansValue}
+
     onQmlRfidSignal:{
-                if (emitRfidTag != "")
-                 {                    
+                console.log("onQmlRfidSignal")
+                if (emitRfidTag != 0)
+                 {
                     if (payingProcess.activeFocus)
                     {
                         payingProcess.close()
@@ -29,11 +31,11 @@ Page {
     onQmlReadySignal:{
         console.log("ready signal qml check")
         if (emitReadyValue == false){
-            readyCircle.color = "red"    
+            readyCircle.color = "red"
         }
         else{
-            readyCircle.color = "green"  
-        }        
+            readyCircle.color = "green"
+        }
     }
     }
 
@@ -127,7 +129,7 @@ Page {
                 radius: 8
             }
 
-            onClicked: { 
+            onClicked: {
                         swipeView.setCurrentIndex(0)
                         Coffee.closeReadBeans()
                     }
@@ -157,7 +159,7 @@ Page {
             }
             anchors.right: parent.right
             anchors.rightMargin: 50
-            onClicked: { 
+            onClicked: {
                         cleaningAuth.open()
                         Coffee.cleaningAuth()
                         }
@@ -400,7 +402,7 @@ Page {
                         anchors.centerIn: parent
                         font.pointSize: 18
                     }
-                    onClicked: { 
+                    onClicked: {
                                 cleaningFullPopup.close()
                                  Coffee.incCleaning(Coffee.cleaningType)
                                  Coffee.cleaningCouter = 0
@@ -419,6 +421,9 @@ Page {
                 height: parent.height/2
                 modal: true
                 focus: true
+                onClosed: {
+                    Coffee.closeRfidThread() }
+
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
                 Image {
                     id: payingProcessImage
