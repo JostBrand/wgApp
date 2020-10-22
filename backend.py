@@ -19,6 +19,22 @@ ECHO=31
 
 
 
+def RFID_reset():
+    RSTPin=22
+    GPIO.setup(RSTPin, GPIO.OUT)
+    GPIO.output(RSTPin, True)
+    time.sleep(0.2)
+    GPIO.output(RSTPin, False)
+    time.sleep(0.2)
+    #GPIO.output(RSTPin,True)
+    GPIO.cleanup()
+    print("RFID reset, initializing...")
+    raspi_gpio_init()
+    global reader2
+    reader2 = MyReader()
+
+
+
 def raspi_gpio_init():
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD) # GPIO Nummern statt Board Nummern
@@ -72,6 +88,7 @@ class MyReader(SimpleMFRC522):
 reader2 = MyReader()
 
 def scan_rfid():
+
     print("RFID Scan gestartet, Chip jetzt vorhalten")
     output = reader2.read()
     return output[0]
@@ -143,54 +160,29 @@ def bean_height(avg=False,relative=True):
 
 
 def ready_check():
-    adc = ADS1015()
-    GAIN = 1
-    READY=0
 
-    measures=[0]*3
-    x=0
+    adc = ADS1015()
+
+
     counter=0
     for _ in range(30):
         values = [0]*4
         for i in range(4):
-            values[i] = adc.read_adc(i, gain=GAIN)
+            values[i] = adc.read_adc(i, gain=1)
 
         measures=values[2]
-        #x=x+1
-        #if x==2:
-        #    x=0
 
-        #print("milliVolts")
-        #print(measures[0], measures[1])
-        #print(np.abs(measures[0]-measures[1]))
-
-        #print("milliVolts")
-        #print(measures)
-
-#        if np.abs(measures[0]-measures[1]) <=200 and measures[0] >=1000:
-#            #print("System betriebsbereit")
-#            READY +=1
-#        else:
-            #print("System nicht betriebsbereit")
-#            READY -=1
-
-        if measures <=1400:
+        if measures <= 1400:
             counter += 1
 
 
 
         time.sleep(0.05)
 
-    #print("counter abs: "+str(counter)+" relative: "+ str(counter/30))
-    #GPIO.cleanup()
-
     if counter <= 5:
         return True
     else:
         return False
-
-
-    #return READY > 0
 
 
 #beanheight=bean_height(avg=True)

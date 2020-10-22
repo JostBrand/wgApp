@@ -2,11 +2,11 @@
 import sys
 import os
 import time
-
+import numpy as np
 from PyQt5.QtGui import QGuiApplication, QKeySequence
 from PyQt5.QtQml import QQmlApplicationEngine
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QThread
-from PyQt5.QtWidgets import QShortcut
+from PyQt5.QtWidgets import QShortcut, QWidget
 import database
 import random
 import logging
@@ -19,7 +19,7 @@ class RfidT(QThread):
 
     def __init__(self, parent=None):
         super(self.__class__, self).__init__(parent)
-        self.usage = 0
+        self.usage = 0  # Usage is 1 for Coffee 0 for Cleaning and 2 for Refill
         self.threadactive = True
 
     RfidSignal = pyqtSignal(str)
@@ -31,13 +31,14 @@ class RfidT(QThread):
         tag = None
         self.threadactive = True
 
+
         while self.threadactive and tag is None:
             tag = backend.scan_rfid()
 
         if db.tagExists(tag):
             tag = str(tag)
             self.RfidSignal.emit(tag)
-            if self.usage and db.payCoffee(str(tag)):
+            if self.usage is 1 and db.payCoffee(str(tag)):
                 backend.start_button()
                 self.RfidSignal.emit("")
 
@@ -63,7 +64,7 @@ class ReadyT(QThread):
 
     def stop(self):
         self.threadactive = False
-        self.wait()
+        # self.wait()
 
 
 class BeansT(QThread):
@@ -80,14 +81,16 @@ class BeansT(QThread):
             try:
                 val = backend.bean_height(avg=True)
             except:
-                val = 0
-            self.beansSignal.emit(float(val))
+                val = -1
+
+            if val is not -1:
+                self.beansSignal.emit(float(val))
             if self.threadactive:
-                time.sleep(0.5)
+                time.sleep(1.5)
 
     def stop(self):
         self.threadactive = False
-        self.wait()
+        # self.wait()
 
 
 class MainWindow(QObject):
@@ -101,6 +104,7 @@ class MainWindow(QObject):
         self.t2 = RfidT()
         self.t2.RfidSignal.connect(self.emitRfidTag)
         self.activeTag = None
+        self.lastTag = None
         self.ready = False
         self.cleaningType = "x"
 
@@ -108,12 +112,18 @@ class MainWindow(QObject):
     qmlBeansSignal = pyqtSignal(float, arguments=['emitBeansValue'])
     qmlRfidSignal = pyqtSignal(str, arguments=['emitRfidTag'])
     qmlReadySignal = pyqtSignal(bool, arguments=['emitReadyValue'])
+    qmlBalanceSignal = pyqtSignal(float, arguments=['emitBalanceValue'])
 
     @pyqtSlot()
     def closeRfidThread(self):
         self.t2.threadactive = False
         if self.t2.isFinished():
             print("RFID thread closed.")
+
+    @pyqtSlot()
+    def setBalanceText(self):
+        if self.activeTag is not None:
+            self.qmlBalanceSignal.emit(np.around(float(db.getAccountBalance(str(self.activeTag))), decimals=2))
 
     @pyqtSlot()
     def cleaningMilk(self):
@@ -130,19 +140,42 @@ class MainWindow(QObject):
     def setCleaningFull(self):
         self.cleaningType = "Full"
 
+    @pyqtSlot()
+    def refund(self):
+        if self.lastTag is None:
+            return
+        print(f'{db.getAccountName(self.lastTag)} got a refund.')
+        db.changeAmount(self.lastTag, db.getAccountBalance(self.lastTag) + 0.35)
+        database.systemlogger("Refund claimed",self.lastTag)
+        db.incRefund(self.lastTag)
 
     @pyqtSlot()
     def incCleaning(self):
         print(f"{db.getAccountName(self.activeTag)} has done a {self.cleaningType} cleaning.")
         db.incCleaning(self.cleaningType, self.activeTag)
+        if self.cleaningType == "Lime":
+            cleaningReward = 1.5
+        elif self.cleaningType == "Full":
+            cleaningReward = 2
+        else:
+            cleaningReward = 0
+
+        db.changeAmount(self.activeTag, db.getAccountBalance(self.activeTag) + cleaningReward)
         self.activeTag = None
-
-
 
     @pyqtSlot()
     def press_start(self):
         backend.start_button()
 
+    @pyqtSlot()
+    def refillAuth(self):
+        self.readRfid(2)
+
+    @pyqtSlot()
+    def confirmRefill(self):
+        db.changeAmount(str(self.activeTag), str(float(db.getAccountBalance(str(self.activeTag)) + 10)))
+        print(f"{db.getAccountName(str(self.activeTag))} has refilled the coffee. Thank You.")
+        self.qmlBalanceSignal.emit(np.around(float(db.getAccountBalance(str(self.activeTag))), decimals=2))
 
     @pyqtSlot()
     def cleaningAuth(self):
@@ -186,8 +219,12 @@ class MainWindow(QObject):
         if len(val) > 3:
             print(f"RFID-Tag: {str(val)} ({db.getAccountName(val)}) logged in.")
         self.activeTag = val
-        self.qmlRfidSignal.emit(val)
+        if self.activeTag is not "":
+            self.lastTag = self.activeTag
+        self.qmlRfidSignal.emit(str(val))
 
+    def call_reset():
+        backend.RFID_reset()
 
 if __name__ == "__main__":
     try:
@@ -207,3 +244,4 @@ if __name__ == "__main__":
     except (KeyboardInterrupt, SystemExit):
         backend.GPIO.cleanup()
         sys.exit()
+s

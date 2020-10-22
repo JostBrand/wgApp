@@ -36,7 +36,6 @@ Page {
         height: root.height
         source: "Pictures/coffeeMainPage.jpg"
         fillMode: Image.PreserveAspectCrop
-
         MouseArea {
             id: mouseAreaCoffee
             anchors.fill: parent
@@ -45,6 +44,7 @@ Page {
                 swipeView.setCurrentIndex(1)
                 Coffee.readBeans()
                 Coffee.startReadyT()
+                Coffe.call_reset()
             }
         }
     }

@@ -2,6 +2,7 @@
 
 import sqlite3 as sl
 import datetime
+import backend
 
 # Tasks are assigned by calendar week
 date = datetime.date.today()
@@ -10,27 +11,34 @@ NrWeek = date.isocalendar()[1]
 import sqlite3
 
 dbname = 'wg.db'
-priceCoffe= 0.35
+priceCoffe = 0.35
 
 def systemlogger(logmsg,tag):
     dt = datetime.datetime.now()
     with open("systemlog.txt", "a") as myfile:
-        myfile.write(str(dt) + "--- action: "+ logmsg + "by user: "+str(tag)+("\n"))
+        myfile.write(str(dt) + "--- action: " + logmsg + "by user: "+str(tag)+ "\n")
 
-
-def getRfidTag():
-        grabbing = True
-        if grabbing == True:
-            return 2
-        else:
-            return 0
 
 class cDB():
     def __init__(self):
         self.CoffeeBeans = 100
 
-    def checkCoffeBeans(self):
-        return None
+    def set(self,statement):
+        conn = sqlite3.connect(dbname)
+        c = conn.cursor()
+        c.execute(statement)
+        conn.commit()
+        conn.close()
+
+    # Getter for single lines
+    def get(self,statement):
+        conn = sqlite3.connect(dbname)
+        c = conn.cursor()
+        c.execute(statement)
+        result = c.fetchone()[0]
+        conn.commit()
+        return result
+
     def setupDB(self):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
@@ -51,106 +59,77 @@ class cDB():
         conn.commit()
         conn.close()
 
+
     def addWG(self):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
-        sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime,CoffesTaken,ReFunds) values(?, ?, ?,?,?,?,?,?,?,?)'
+        sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime,CoffesTaken,ReFunds) values(?, ?, ?,?,0,0,0,0,0,0)'
         data = [
-    (1, 'Jost', 1,"441850866162"  ,500.0,0,0,0,0,0),
-    (2, 'Alex', 1,"535544663601"  ,0.0,0,0,0,0,0),
-    (3, 'Jarno', 2,"577279633739" ,0.0,0,0,0,0,0),
-    (4, 'Miriem', 2,"575681407471",0.0,0,0,0,0,0),
-    (5, 'OktMb', 3,"371127429628" ,0.0,0,0,0,0,0),
-    (6, 'Amir', 3,"440087554427"  ,10.0,0,0,0,0,0),
-    (7, 'Jonas', 4,"576080062850" ,0.0,0,0,0,0,0),
-    (8, 'Sharon', 4,"327982457717",0.0,0,0,0,0,0),
-    (9, 'Tij', 5,"465768615401"   ,0.0,0,0,0,0,0),
-    (10, 'Felix', 5,"438374246778",5.0,0,0,0,0,0),
-    (11, 'Kira', 6,"442358835477" ,0.0,0,0,0,0,0)
+    (1, 'Jost', 1,"441850866162"),
+    (2, 'Alex', 1,"535544663601"),
+    (3, 'Jarno', 2,"577279633739"),
+    (4, 'Miriem', 2,"575681407471"),
+    (5, 'OktMb', 3,"371127429628"),
+    (6, 'Amir', 3,"440087554427"),
+    (7, 'Jonas', 4,"576080062850"),
+    (8, 'Sharon', 4,"327982457717"),
+    (9, 'Tij', 5,"465768615401"),
+    (10, 'Felix', 5,"438374246778"),
+    (11, 'Kira', 6,"442358835477")
 ]
         c.executemany(sql,data)
         conn.commit()
-        conn.close()
 
     def getUserCount(self):
-        conn = sqlite3.connect(dbname)
-        c = conn.cursor()
-        sql = 'SELECT COUNT(*) FROM USER'
-        c.execute(sql)
-        result = c.fetchone()[0]
-        conn.commit()
-        conn.close()
-        return result
+        return self.get('SELECT COUNT(*) FROM USER')
 
     def tagExists(self,RfidTag=None):
         if RfidTag is None:
             return False
-        conn = sqlite3.connect(dbname)
-        c = conn.cursor()
-        sql = 'SELECT COUNT(*) FROM USER WHERE RfidTag = "{}"'.format(RfidTag)
-        c.execute(sql)
-        result = c.fetchone()[0]
-        conn.commit()
-        conn.close()
-        return result != 0
+        return self.get(f'SELECT COUNT(*) FROM USER WHERE RfidTag = {RfidTag}')
+        #return self.get(f'SELECT COUNT(*) FROM USER WHERE RfidTag = {RfidTag}') != 0
 
     def getAccountName(self,RfidTag):
-        conn = sqlite3.connect(dbname)
-        c = conn.cursor()
-        sql_get = 'SELECT name FROM USER WHERE RfidTag=="{}"'.format(RfidTag)
-        c.execute(sql_get)
-        result = c.fetchone()[0]
-        conn.commit()
-        conn.close()
-        return result
+        if  not self.tagExists(RfidTag):
+            return
+        return self.get(f'SELECT name FROM USER WHERE RfidTag=={RfidTag}')
 
     def getAccountBalance(self,RfidTag):
-       conn = sqlite3.connect(dbname)
-       c = conn.cursor()
-       sql_get = 'SELECT Amount FROM USER WHERE RfidTag=="{}"'.format(RfidTag)
-       c.execute(sql_get)
-       result = c.fetchone()[0]
-       conn.commit()
-       conn.close()
-       return result
+       if not self.tagExists(RfidTag):
+           return 0
+       return self.get(f'SELECT Amount FROM USER WHERE RfidTag=={RfidTag}')
 
-    def changeAmount(self,RfidTag,charge):
-        conn = sqlite3.connect(dbname)
-        c = conn.cursor()
-        sql_set = 'UPDATE USER SET Amount={} WHERE RfidTag="{}"'.format(charge,RfidTag)
-        c.execute(sql_set)
-        conn.commit()
-        conn.close()
+    def changeAmount(self,RfidTag,newVal):
+        self.set(f'UPDATE USER SET Amount={newVal} WHERE RfidTag={RfidTag}')
         return True
 
+    def incRefund(self, RfidTag):
+        sql_inc = f'UPDATE USER SET ReFunds=ReFunds+1 WHERE RfidTag = {RfidTag}'
+        print(sql_inc)
+        self.set(sql_inc)
+
     #3 Cleaning buttons
-    def incCleaning(self,cleaningType,user_id):
+    def incCleaning(self, cleaningType, RfidTag):
 
-        if user_id is None:
-            systemlogger("inCleaning failed - User ID None","NA")
+        if RfidTag is None:
+            systemlogger("inCleaning failed - User ID None", "NA")
             return False
-
-        conn = sqlite3.connect(dbname)
-        c = conn.cursor()
         if cleaningType == "Milk":
                 cleaningType = "CleaningMilkCounter"
-                systemlogger("Milktube Cleaned",user_id)
+                systemlogger("Milktube Cleaned",RfidTag)
         elif cleaningType == "Full":
                 cleaningType = "CleaningFullCounter"
-                systemlogger("Full Clean",user_id)
+                systemlogger("Full Clean",RfidTag)
         elif cleaningType == "Lime":
                 cleaningType = "CleaningLime"
-                systemlogger("Lime Clean",user_id)
+                systemlogger("Lime Clean",RfidTag)
         else:
             return None
 
-        sql_inc = f'UPDATE USER SET {cleaningType}={cleaningType}+1 WHERE id = {user_id}'
-        c.execute(sql_inc)
-        conn.commit()
-        conn.close()
+        self.set(f'UPDATE USER SET {cleaningType}={cleaningType}+1 WHERE RfidTag = "{RfidTag}"')
         return True
 
-    def getFullUserDataById(self,user_id):
+    def getFullUserDataById(self, user_id):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
         sql = 'SELECT * FROM USER WHERE ID={}'.format(user_id)
@@ -158,17 +137,26 @@ class cDB():
         for row in result:
             print(row)
 
+    def getFullDump(self):
+        conn = sqlite3.connect(dbname)
+        c = conn.cursor()
+        sql = 'SELECT * FROM USER'
+        result = c.execute(sql)
+        for row in result:
+            print(row)
+
     def payCoffee(self,tag):
         print("payCoffe func")
         if self.CoffeeBeans <= 0.15:
-            print("CoffeBeans empty. Please refill or check Sensor")
+            print("Beans empty. Please refill or check Sensor")
             return False
         balance = self.getAccountBalance(tag)
         if balance >= priceCoffe:
             newBalance = balance-priceCoffe
-            self.changeAmount(tag,newBalance)
-            print(f"Your new balance is {newBalance}")
-            systemlogger("Coffee Taken",tag)
+            self.changeAmount(tag, newBalance)
+            print(f'Your new balance is {newBalance}')
+            systemlogger("Coffee taken ", tag)
+
             return True
         else:
             #CLose Popup; balance too low
@@ -183,7 +171,7 @@ if __name__ == "__main__":
     if db.getUserCount() == 0:
         db.addWG()
 
-    print(db.tagExists())
+    print(db.getFullDump())
 
 def setup():
     db = cDB()
@@ -191,4 +179,7 @@ def setup():
 
     if db.getUserCount() == 0:
         db.addWG()
+        db.changeAmount("441850866162", 500)
+        db.changeAmount("438374246778", 500)
+
     return db
