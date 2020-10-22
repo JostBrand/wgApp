@@ -108,6 +108,7 @@ class MainWindow(QObject):
         self.ready = False
         self.cleaningType = "x"
 
+
     payingSignal = pyqtSignal(str, arguments=['paying'])
     qmlBeansSignal = pyqtSignal(float, arguments=['emitBeansValue'])
     qmlRfidSignal = pyqtSignal(str, arguments=['emitRfidTag'])
@@ -223,7 +224,7 @@ class MainWindow(QObject):
             self.lastTag = self.activeTag
         self.qmlRfidSignal.emit(str(val))
 
-    def call_reset():
+    def call_reset(self):
         backend.RFID_reset()
 
 if __name__ == "__main__":

@@ -18,7 +18,6 @@ TRIG=29
 ECHO=31
 
 
-
 def RFID_reset():
     RSTPin=22
     GPIO.setup(RSTPin, GPIO.OUT)

@@ -31,7 +31,10 @@ Window {
         WeeklyTasksPage{}
 
     }
-}
+    Shortcut {
+        sequence: "Esc"
+        onActivated: root.close()}
+    }
 
 /*##^##
 Designer {

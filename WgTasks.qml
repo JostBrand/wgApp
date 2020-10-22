@@ -23,4 +23,8 @@ ListModel {
         name: "shopping"
         number: "5"
     }
+    ListElement {
+        name: "Summary"
+        number: "6"
+    }
 }

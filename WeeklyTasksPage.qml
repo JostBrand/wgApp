@@ -7,15 +7,6 @@ import QtQuick.Extras 1.4
 
 Page {
 
-//    Connections{
-//        target: Coffee
-//        onSliderSignal: {
-//            console.log("func")
-//            homebuttonWTtext.text = "hans"
-
-//        }
-//   }
-
     id: wTPage
     title: qsTr("wtPage")
     Image {
@@ -48,18 +39,15 @@ Page {
     Button {
         id: homebuttonWT
         x: parent.width-150-50
-        y: parent.height*0.9
+        y: parent.height*0.8
         Text{id:homebuttonWTtext
             text:"Home"
             fontSizeMode: Text.Fit
             anchors.centerIn: parent
             font.pointSize: 18
         }
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: 5
-        anchors.bottomMargin: 20
-        width: 150
-        height: 50
+        width: 200
+        height: 100
 
         background: Rectangle {
             anchors.fill:parent
@@ -75,24 +63,47 @@ Page {
     Rectangle {
         id: rectangleTextBottom
         anchors.centerIn: parent
-        width: parent.width*0.7
+        width: parent.width
         height: parent.height*0.7
-        color: "#ffffff"
+        color: "transparent"
+
 
         Component {
             id: tasksDelegate
             Item {
-                width: parent.width; height: parent.width/8
+
                 Column {
-                    Text { text: '<b>Name:</b> ' + name }
-                    Text { text: '<b>Number:</b> ' + number }
+                    anchors.centerIn: parent
+                    anchors.fill:parent
+                    Button {
+                        anchors.centerIn: parent
+                        background: Rectangle {
+                            anchors.fill:parent
+                            color: "white"
+                            border.width: 1
+                            border.color: "black"
+                            radius: 1
+                        }
+                        Text{id:homebuttonWTtext
+                            text: '<b>Name:</b> ' + name + '\n' + '<b>Number:</b> ' + number
+                            fontSizeMode: Text.Fit
+                            anchors.centerIn: parent
+                            font.pointSize: 10
+                        }
+
+                    }
+
                 }
             }
         }
 
-        ListView {
-            anchors.fill:parent
-            highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+        GridView {
+            id: view
+            x: 194
+            y: 24
+            width: parent.width; height: parent.height
+            cellWidth: 400; cellHeight: 150
+
             model: WgTasks {}
             delegate: tasksDelegate
         }
