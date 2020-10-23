@@ -3,3 +3,6 @@ __pychache__/*
 main.pyproject.user*
 wg.db
 *.qmlc
+*.txt
+*.pyc
+

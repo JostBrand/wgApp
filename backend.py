@@ -41,6 +41,8 @@ def raspi_gpio_init():
     GPIO.setup(RELAIS_1_GPIO, GPIO.OUT) # GPIO Modus zuweisen
     GPIO.setup(RELAIS_2_GPIO, GPIO.OUT) # GPIO Modus zuweisen
 
+    GPIO.output(RELAIS_1_GPIO, GPIO.HIGH) # an
+    GPIO.output(RELAIS_2_GPIO, GPIO.HIGH)
     #rfid object
     #reader = SimpleMFRC522()
 

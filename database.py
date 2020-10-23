@@ -13,11 +13,6 @@ import sqlite3
 dbname = 'wg.db'
 priceCoffe = 0.35
 
-def systemlogger(logmsg,tag):
-    dt = datetime.datetime.now()
-    with open("systemlog.txt", "a") as myfile:
-        myfile.write(str(dt) + "--- action: " + logmsg + "by user: "+str(tag)+ "\n")
-
 
 class cDB():
     def __init__(self):
@@ -112,17 +107,17 @@ class cDB():
     def incCleaning(self, cleaningType, RfidTag):
 
         if RfidTag is None:
-            systemlogger("inCleaning failed - User ID None", "NA")
+            self.systemlogger("inCleaning failed - User ID None", "NA")
             return False
         if cleaningType == "Milk":
                 cleaningType = "CleaningMilkCounter"
-                systemlogger("Milktube Cleaned",RfidTag)
+                self.systemlogger("Milktube Cleaned",RfidTag)
         elif cleaningType == "Full":
                 cleaningType = "CleaningFullCounter"
-                systemlogger("Full Clean",RfidTag)
+                self.systemlogger("Full Clean",RfidTag)
         elif cleaningType == "Lime":
                 cleaningType = "CleaningLime"
-                systemlogger("Lime Clean",RfidTag)
+                self.systemlogger("Lime Clean",RfidTag)
         else:
             return None
 
@@ -155,13 +150,20 @@ class cDB():
             newBalance = balance-priceCoffe
             self.changeAmount(tag, newBalance)
             print(f'Your new balance is {newBalance}')
-            systemlogger("Coffee taken ", tag)
+            self.systemlogger("Coffee taken ", tag)
 
             return True
         else:
             #CLose Popup; balance too low
             print("Balance too low")
             return False
+
+    def systemlogger(self,logmsg,tag):
+        dt = datetime.datetime.now()
+        with open("systemlog.txt", "a") as myfile:
+            myfile.write(str(dt) + "--- action: " + logmsg + " by user: "+str(tag)+ " ("+self.getAccountName(tag)+")"+ "\n")
+
+
 
 
 if __name__ == "__main__":

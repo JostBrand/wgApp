@@ -147,7 +147,7 @@ class MainWindow(QObject):
             return
         print(f'{db.getAccountName(self.lastTag)} got a refund.')
         db.changeAmount(self.lastTag, db.getAccountBalance(self.lastTag) + 0.35)
-        database.systemlogger("Refund claimed",self.lastTag)
+        db.systemlogger("Refund claimed",self.lastTag)
         db.incRefund(self.lastTag)
 
     @pyqtSlot()
@@ -224,6 +224,7 @@ class MainWindow(QObject):
             self.lastTag = self.activeTag
         self.qmlRfidSignal.emit(str(val))
 
+    @pyqtSlot()
     def call_reset(self):
         backend.RFID_reset()
 

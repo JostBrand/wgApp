@@ -28,6 +28,16 @@ Page {
         }
     }
 
+    Timer {
+      id : timerlogout
+      interval: 120000; running: false; repeat: false;
+      onTriggered:{
+        console.log("Going back to Front Page")
+        //popupRefillThankYou.close()
+        swipeView.setCurrentIndex(0)
+        Coffee.closeReadBeans()
+      } }
+
     Image {
         id: imageCoffe
         x: 0
@@ -44,7 +54,8 @@ Page {
                 swipeView.setCurrentIndex(1)
                 Coffee.readBeans()
                 Coffee.startReadyT()
-                Coffe.call_reset()
+                Coffee.call_reset()
+                timerlogout.start()
             }
         }
     }
