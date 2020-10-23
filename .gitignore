@@ -6,4 +6,5 @@ wg.db
 *.txt
 *.pyc
 .gitignore
+.idea
 
