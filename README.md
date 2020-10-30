@@ -9,7 +9,7 @@
 
 ## Ui Design 
 
-![](Pictures/uidesign.jpg){ width=100% }
+![](Pictures/uidesign.jpg)
 
 physical devices
 
@@ -18,5 +18,5 @@ physical devices
  - 16 Bit ADS for checking status LED
  - relays to switch start button
 
-![](Pictures/coffeeberry.jpg){ width=100% }
+![](Pictures/coffeeberry.jpg)
 
