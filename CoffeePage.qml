@@ -193,7 +193,7 @@ Page {
                 font.pointSize: 18
 			}
             onClicked: {
-                        Coffee.refillAuth()
+                        Coffee.Auth("Refill")
 						popupRefill.open()
                         }
         }//buttonRefill
@@ -219,7 +219,7 @@ Page {
 								text:"Please login with your RFID-Chip."
 								color:"white"
 								fontSizeMode: Text.Fit
-								font.pointSize: 30
+								font.pointSize: 20
 							}
 					}
 
@@ -378,7 +378,7 @@ Page {
             }
             onClicked: {
                         cleaningAuth.open()
-                        Coffee.cleaningAuth()
+                        Coffee.Auth("Cleaning")
                         }
         }
 
@@ -408,7 +408,7 @@ Page {
 
             onClicked: {
                 payingProcess.open() //Open Paying Popup window
-                Coffee.paying()
+                Coffee.Auth("Coffee")
             }
         }
 	Popup {
@@ -514,7 +514,8 @@ Page {
                     }
                     onClicked: { cleaningFullPopup.open()
                                  cleaningProcess.close()
-                                 Coffee.setCleaningLime()
+                                 //Coffee.setCleaningLime()
+								Coffee.setter("cleaningType","Lime")
                                  }
                 }
                 Button {
@@ -541,7 +542,9 @@ Page {
                     }
                     onClicked: { cleaningFullPopup.open()
                                  cleaningProcess.close()
-                                 Coffee.setCleaningFull()}
+                                 //Coffee.setCleaningFull()
+								 Coffee.setter("cleaningType","Full")
+						}
                 }
             }
         }

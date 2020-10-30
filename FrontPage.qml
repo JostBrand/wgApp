@@ -24,19 +24,20 @@ Page {
             onClicked: {
                 console.log("WT pressed");
                 swipeView.setCurrentIndex(2)
+                Coffee.setTasks()
                 }
         }
     }
 
     Timer {
       id : timerlogout
-      interval: 120000; running: false; repeat: false;
+      interval: 1200000; running: false; repeat: false;
       onTriggered:{
         console.log("Going back to Front Page")
-        //popupRefillThankYou.close()
         swipeView.setCurrentIndex(0)
         Coffee.closeReadBeans()
-      } }
+      }
+    }
 
     Image {
         id: imageCoffe

@@ -1,20 +1,14 @@
 # This Python file uses the following encoding: utf-8
 
-import sqlite3 as sl
+
 import datetime
-import backend
-
-# Tasks are assigned by calendar week
-date = datetime.date.today()
-NrWeek = date.isocalendar()[1]
-
 import sqlite3
 
 dbname = 'wg.db'
 priceCoffe = 0.35
 
 
-class cDB():
+class cDB:
     def __init__(self):
         self.CoffeeBeans = 100
 
@@ -26,11 +20,19 @@ class cDB():
         conn.close()
 
     # Getter for single lines
-    def get(self,statement):
+    def get(self, statement, single=True):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
-        c.execute(statement)
-        result = c.fetchone()[0]
+
+        if single is True:
+            c.execute(statement)
+            result = c.fetchone()[0]
+        else:
+            result = c.execute(statement)
+            tmp = []
+            for row in result:
+                    tmp.append(row)
+            result = tmp
         conn.commit()
         return result
 
@@ -58,22 +60,25 @@ class cDB():
     def addWG(self):
         conn = sqlite3.connect(dbname)
         c = conn.cursor()
-        sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime,CoffesTaken,ReFunds) values(?, ?, ?,?,0,0,0,0,0,0)'
+        sql = 'INSERT INTO USER (id, name, GroupNr,RfidTag,Amount,CleaningMilkCounter,CleaningFullCounter,CleaningLime,CoffesTaken,ReFunds,TaskStatus) values(?, ?, ?,?,0,0,0,0,0,0,false)'
         data = [
-    (1, 'Jost', 1,"441850866162"),
-    (2, 'Alex', 1,"535544663601"),
-    (3, 'Jarno', 2,"577279633739"),
-    (4, 'Miriem', 2,"575681407471"),
-    (5, 'OktMb', 3,"371127429628"),
-    (6, 'Amir', 3,"440087554427"),
-    (7, 'Jonas', 4,"576080062850"),
-    (8, 'Sharon', 4,"327982457717"),
-    (9, 'Tij', 5,"465768615401"),
-    (10, 'Felix', 5,"438374246778"),
-    (11, 'Kira', 6,"442358835477")
+    (1, 'Jost', 1, "441850866162"),
+    (2, 'Alex', 1, "535544663601"),
+    (3, 'Jarno', 2, "577279633739"),
+    (4, 'Miriem', 2, "575681407471"),
+    (5, 'OktMb', 3, "371127429628"),
+    (6, 'Amir', 3, "440087554427"),
+    (7, 'Jonas', 4, "576080062850"),
+    (8, 'Sharon', 4, "327982457717"),
+    (9, 'Tij', 5, "465768615401"),
+    (10, 'Felix', 5, "438374246778"),
+    (11, 'Kira', 6, "442358835477")
 ]
-        c.executemany(sql,data)
+        c.executemany(sql, data)
         conn.commit()
+
+    def getTasksStatus(self,groupId):
+        return bool(self.get(f'SELECT DISTINCT(TaskStatus) FROM USER WHERE GroupNr={groupId}'))
 
     def getUserCount(self):
         return self.get('SELECT COUNT(*) FROM USER')
@@ -94,9 +99,22 @@ class cDB():
            return 0
        return self.get(f'SELECT Amount FROM USER WHERE RfidTag=={RfidTag}')
 
-    def changeAmount(self,RfidTag,newVal):
-        self.set(f'UPDATE USER SET Amount={newVal} WHERE RfidTag={RfidTag}')
+    #ChangeAmount
+    def changeValue(self,RfidTag,Variable,newVal, CoffeeTaken=False):
+        self.set(f'UPDATE USER SET {Variable}={newVal} WHERE RfidTag={RfidTag}')
+        if CoffeeTaken:
+            self.set(f'UPDATE USER SET CoffesTaken=CoffesTaken+1 WHERE RfidTag={RfidTag}')
         return True
+
+    def checkTask(self, groupId):
+        self.set(f'UPDATE USER SET TaskStatus=1 WHERE GroupNr={groupId}')
+
+    def resetTasks(self):
+        self.set(f'UPDATE USER SET TaskStatus=0')
+
+
+    def getGroupId(self, RfidTag):
+        return self.get(f'SELECT GroupNr FROM USER WHERE RfidTag={RfidTag}')
 
     def incRefund(self, RfidTag):
         sql_inc = f'UPDATE USER SET ReFunds=ReFunds+1 WHERE RfidTag = {RfidTag}'
@@ -111,13 +129,13 @@ class cDB():
             return False
         if cleaningType == "Milk":
                 cleaningType = "CleaningMilkCounter"
-                self.systemlogger("Milktube Cleaned",RfidTag)
+                self.systemlogger("Milktube Cleaned", RfidTag)
         elif cleaningType == "Full":
                 cleaningType = "CleaningFullCounter"
-                self.systemlogger("Full Clean",RfidTag)
+                self.systemlogger("Full Clean", RfidTag)
         elif cleaningType == "Lime":
                 cleaningType = "CleaningLime"
-                self.systemlogger("Lime Clean",RfidTag)
+                self.systemlogger("Lime Clean", RfidTag)
         else:
             return None
 
@@ -125,20 +143,11 @@ class cDB():
         return True
 
     def getFullUserDataById(self, user_id):
-        conn = sqlite3.connect(dbname)
-        c = conn.cursor()
-        sql = 'SELECT * FROM USER WHERE ID={}'.format(user_id)
-        result = c.execute(sql)
-        for row in result:
-            print(row)
+        self.get(f'SELECT * FROM USER WHERE ID={user_id}', single=False)
 
     def getFullDump(self):
-        conn = sqlite3.connect(dbname)
-        c = conn.cursor()
-        sql = 'SELECT * FROM USER'
-        result = c.execute(sql)
-        for row in result:
-            print(row)
+        self.get('SELECT * FROM USER', single=False)
+
 
     def payCoffee(self,tag):
         print("payCoffe func")
@@ -148,7 +157,7 @@ class cDB():
         balance = self.getAccountBalance(tag)
         if balance >= priceCoffe:
             newBalance = balance-priceCoffe
-            self.changeAmount(tag, newBalance)
+            self.changeValue(tag, "Amount", newBalance, CoffeeTaken=True)
             print(f'Your new balance is {newBalance}')
             self.systemlogger("Coffee taken ", tag)
 
@@ -181,7 +190,7 @@ def setup():
 
     if db.getUserCount() == 0:
         db.addWG()
-        db.changeAmount("441850866162", 500)
-        db.changeAmount("438374246778", 500)
+        db.changeValue("441850866162", "Amount", 500)
+        db.changeValue("438374246778", "Amount", 500)
 
     return db
