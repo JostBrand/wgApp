@@ -1,17 +1,17 @@
-# Coffeeberry 
+# Coffeeberry - coffee with a raspberry
 
 
-## PyQt 5 & QtQuick 2 
+## PyQt 5 & QML
 
  - buy coffe using RFID
  - get paid for cleaning and refilling beans
 
 
-## Ui Design 
+## One of four pages 
 <img src=Pictures/uidesign.jpg width=600>
 
 
-physical devices
+# Physical devices
 
  - MFRC522 RFID Transmitter
  - HC-SR04 Ultrasonic Sensor
@@ -20,4 +20,6 @@ physical devices
 
 
 <img src=Pictures/coffeeberry.jpg width=600>
+
+All pictures are from unsplash.com
 
