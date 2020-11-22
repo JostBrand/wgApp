@@ -3,11 +3,11 @@
 
 ## PyQt 5 & QML
 
- - buy coffe using RFID
+ - buy coffee using RFID
  - get paid for cleaning and refilling beans
 
 
-## One of four pages 
+## One of four pages
 <img src=Pictures/uidesign.jpg width=600>
 
 
@@ -23,3 +23,4 @@
 
 All pictures are from unsplash.com
 
+authors: Jost Brandstetter and Felix Schürmann 2020
